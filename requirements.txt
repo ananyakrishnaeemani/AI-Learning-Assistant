@@ -1,0 +1,23 @@
+fastapi
+uvicorn[standard]
+python-jose
+bcrypt==3.2.2
+passlib[bcrypt]
+sqlmodel
+python-dotenv
+requests
+gradio
+langchain-groq
+groq
+langchain-core  
+pydantic
+python-multipart
+pdfminer.six
+faiss-cpu
+  # optional for vector store (or use chromadb)
+python-jose[cryptography]
+langchain
+langchain-community
+fastembed
+pypdf2
+
