@@ -155,5 +155,5 @@ def rag_chat(request: ChatRequest, user: User = Depends(get_current_user)):
         return_source_documents=False
     )
 
-    response = qa_chain.run(request.message)
+    response = qa_chain.invoke({"query": request.message})
     return {"response": response}
