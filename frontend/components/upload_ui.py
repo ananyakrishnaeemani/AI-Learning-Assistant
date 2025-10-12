@@ -4,7 +4,7 @@ from frontend.utils.api_calls import upload_pdf, rag_chat
 
 def upload_ui(auth_token_state):
     """
-    Combined Upload + Chat UI for EduGPT
+    Combined Upload + Chat UI for LearnWise
     """
 
     gr.Markdown("## 📘 Upload Study Material & Chat with AI Tutor")

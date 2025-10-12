@@ -8,8 +8,8 @@ from frontend.components.progress_ui import progress_ui
 
 
 def main():
-    with gr.Blocks(theme=gr.themes.Soft(), title="EduGPT") as app:
-        gr.Markdown("# EduGPT - AI Learning Platform")
+    with gr.Blocks(theme=gr.themes.Soft(), title="LearnWise") as app:
+        gr.Markdown("# LearnWise - AI Learning Platform")
 
         # This invisible component will store the session token for each user
         # We initialize it with None, as the user is not logged in initially.

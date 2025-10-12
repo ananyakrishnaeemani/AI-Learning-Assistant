@@ -20,7 +20,7 @@ from pydantic import BaseModel
 load_dotenv()
 init_db()
 
-app = FastAPI(title="EduGPT Backend")
+app = FastAPI(title="LearnWise Backend")
 
 app.add_middleware(
     CORSMiddleware,
