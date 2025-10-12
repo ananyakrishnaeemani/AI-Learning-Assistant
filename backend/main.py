@@ -121,6 +121,40 @@ def api_submit_quiz(topic: str, score: float, user: User = Depends(get_current_u
         s.commit()
     return {"ok": True}
 
+class SubmitQuizRequest(BaseModel):
+    topic: str
+    quiz: list
+    answers: list[int]
+
+@app.post("/submit_quiz_answers")
+def api_submit_quiz_answers(request: SubmitQuizRequest, user: User = Depends(get_current_user)):
+    quiz = request.quiz
+    answers = request.answers
+    topic = request.topic
+
+    if len(answers) != len(quiz):
+        raise HTTPException(status_code=400, detail="Number of answers must match number of questions")
+
+    correct = 0
+    for i, q in enumerate(quiz):
+        if answers[i] == q["correct_answer"]:
+            correct += 1
+
+    score = (correct / len(quiz)) * 100
+
+    with get_session() as s:
+        qr = QuizResult(user_id=user.id, topic=topic, score=score)
+        s.add(qr)
+        prog = s.exec(select(Progress).where(Progress.user_id == user.id, Progress.topic == topic)).first()
+        if not prog:
+            prog = Progress(user_id=user.id, topic=topic, completed_percent=min(100.0, score))
+            s.add(prog)
+        else:
+            prog.completed_percent = min(100.0, max(prog.completed_percent, score))
+        s.commit()
+
+    return {"score": score, "correct": correct, "total": len(quiz)}
+
 @app.post("/chat")
 def api_chat(message: str, user: User = Depends(get_current_user)):
     response = agents.instructor_step(message)

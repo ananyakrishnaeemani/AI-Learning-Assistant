@@ -142,3 +142,21 @@ def get_progress(token: str):
         except ValueError:
             return {"error": "Failed to connect to the server or parse error response."}
 
+# ---------------- Submit Quiz Answers ----------------
+def submit_quiz_answers(topic: str, quiz: list, answers: list, token: str):
+    url = f"{BASE_URL}/submit_quiz_answers"
+    headers = auth_header(token)
+    if not headers:
+        return {"error": "Authentication required. Please login first."}
+    data = {"topic": topic, "quiz": quiz, "answers": answers}
+    try:
+        resp = requests.post(url, json=data, headers=headers)
+        resp.raise_for_status()
+        return resp.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Submit quiz answers request failed: {e}")
+        try:
+            return e.response.json() if e.response else {"error": str(e)}
+        except ValueError:
+            return {"error": "Failed to connect to the server or parse error response."}
+
