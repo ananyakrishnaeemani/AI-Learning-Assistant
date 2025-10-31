@@ -190,4 +190,4 @@ def rag_chat(request: ChatRequest, user: User = Depends(get_current_user)):
     )
 
     response = qa_chain.invoke({"query": request.message})
-    return {"response": response}
+    return {"response": response['result']}

@@ -1,5 +1,5 @@
 import gradio as gr
-from frontend.utils.api_calls import chat
+from frontend.utils.api_calls import rag_chat
 
 def chat_ui(auth_token_state: gr.State):
     # The chatbot component displays the conversation history
@@ -23,7 +23,7 @@ def chat_ui(auth_token_state: gr.State):
         yield history, history
 
         # Call the backend API
-        response_data = chat(user_message, token)
+        response_data = rag_chat(user_message, token)
         ai_response = response_data.get("response", "Error: No response from server.")
 
         # Append the AI's response to the history

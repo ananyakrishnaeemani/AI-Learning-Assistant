@@ -108,72 +108,26 @@ task_specify_agent = DiscussAgent(
 )
 
 
-# Function to generating the syllabus
+# Optimized function to generate the syllabus with a single LLM call
 def generate_syllabus(topic, task):
-    task_specifier_msg = task_specifier_template.format_messages(
-        assistant_role_name=assistant_role_name,
-        user_role_name=user_role_name,
-        task=task,
-        word_limit=word_limit,
-    )[0]
-    specified_task_msg = task_specify_agent.step(task_specifier_msg)
-    specified_task = specified_task_msg.content
-    assistant_sys_msg, user_sys_msg = get_sys_msgs(
-        assistant_role_name, user_role_name, specified_task
-    )
+    llm = ChatGroq(model="llama-3.1-8b-instant", groq_api_key=groq_api_key, temperature=0.3)
 
-    assistant_agent = DiscussAgent(
-        assistant_sys_msg, ChatGroq(model="llama-3.1-8b-instant",groq_api_key=groq_api_key)
-    )
-    user_agent = DiscussAgent(
-        user_sys_msg, ChatGroq(model="llama-3.1-8b-instant",groq_api_key=groq_api_key)
-    )
+    prompt = f"""
+    Generate a comprehensive course syllabus for the topic: "{topic}".
 
-    assistant_agent.reset()
-    user_agent.reset()
+    The syllabus should include:
+    1. Course Title
+    2. Course Description
+    3. Learning Objectives
+    4. Prerequisites (if any)
+    5. Course Outline with modules/weeks
+    6. Assessment Methods
+    7. Required Materials/Resources
 
-    assistant_msg = HumanMessage(
-        content=(f"{user_sys_msg.content}. Start instructions.")
-    )
+    Make it detailed but concise, suitable for a beginner to intermediate level course.
+    Format it in a clear, structured manner.
+    """
 
-    user_msg = HumanMessage(content=f"{assistant_sys_msg.content}")
-    user_msg = assistant_agent.step(user_msg)
-
-    print(f"Specified task prompt:\n{specified_task}\n")
-    conversation_history = []
-
-    chat_turn_limit, n = 5, 0
-    while n < chat_turn_limit:
-        n += 1
-        user_ai_msg = user_agent.step(assistant_msg)
-        user_msg = HumanMessage(content=user_ai_msg.content)
-
-        print(f"AI User ({user_role_name}):\n\n{user_msg.content}\n\n")
-        conversation_history.append("AI User:" + user_msg.content)
-
-        assistant_ai_msg = assistant_agent.step(user_msg)
-        assistant_msg = HumanMessage(content=assistant_ai_msg.content)
-        conversation_history.append("AI Assistant:" + assistant_msg.content)
-
-        print(f"AI Assistant ({assistant_role_name}):\n\n{assistant_msg.content}\n\n")
-        if "<TASK_DONE>" in user_msg.content:
-            break
-
-    summarizer_sys_msg = SystemMessage(
-        content=f"Summarize this conversation into a {topic} course syllabus form"
-    )
-    summarizer_prompt = """Here is a conversation history: {conversation_history}.
-    Please summarize into a course syllabus form with the topic from user input."""
-    summarizer_template = HumanMessagePromptTemplate.from_template(
-        template=summarizer_prompt
-    )
-    summarizer_agent = DiscussAgent(
-        summarizer_sys_msg, ChatGroq(model="llama-3.1-8b-instant",groq_api_key=groq_api_key)
-    )
-    summarizer_msg = summarizer_template.format_messages(
-        assistant_role_name=assistant_role_name,
-        user_role_name=user_role_name,
-        conversation_history=conversation_history,
-    )[0]
-    summarizered_msg = summarizer_agent.step(summarizer_msg)
-    return summarizered_msg.content
+    messages = [HumanMessage(content=prompt)]
+    response = llm.invoke(messages)
+    return response.content
